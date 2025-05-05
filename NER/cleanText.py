@@ -4,7 +4,7 @@ import re
 import nltk
 #nltk.download('stopwords')
 #nltk.download()
-from DefaultPackages import openFile, saveFile
+from CollectData.DefaultPackages import openFile, saveFile
 import json
 from nltk.corpus import stopwords
 from nltk.corpus.reader.api import wordpunct_tokenize
