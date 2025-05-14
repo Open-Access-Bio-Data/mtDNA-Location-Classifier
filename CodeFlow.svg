@@ -1,0 +1,254 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="210mm"
+   height="297mm"
+   viewBox="0 0 210 297"
+   version="1.1"
+   id="svg5"
+   inkscape:version="1.2.2 (732a01da63, 2022-12-09)"
+   sodipodi:docname="CodeFlow.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview7"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="mm"
+     showgrid="false"
+     inkscape:zoom="0.69130191"
+     inkscape:cx="-580.78821"
+     inkscape:cy="811.5123"
+     inkscape:window-width="1017"
+     inkscape:window-height="1008"
+     inkscape:window-x="860"
+     inkscape:window-y="9"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="layer1" />
+  <defs
+     id="defs2">
+    <marker
+       style="overflow:visible"
+       id="Arrow1"
+       refX="0"
+       refY="0"
+       orient="auto-start-reverse"
+       inkscape:stockid="Arrow1"
+       markerWidth="4.0606604"
+       markerHeight="6.7071066"
+       viewBox="0 0 4.0606602 6.7071068"
+       inkscape:isstock="true"
+       inkscape:collect="always"
+       preserveAspectRatio="xMidYMid">
+      <path
+         style="fill:none;stroke:context-stroke;stroke-width:1;stroke-linecap:butt"
+         d="M 3,-3 0,0 3,3"
+         id="path5057"
+         transform="rotate(180,0.125,0)"
+         sodipodi:nodetypes="ccc" />
+    </marker>
+  </defs>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <text
+       xml:space="preserve"
+       style="font-style:italic;font-weight:bold;font-size:7.05556px;line-height:0;font-family:'CMU Serif';-inkscape-font-specification:'CMU Serif Bold Italic';text-align:center;text-anchor:middle;fill:#000000;stroke:none;stroke-width:0.529167;paint-order:stroke fill markers"
+       x="49.755154"
+       y="126.68428"
+       id="text236"><tspan
+         sodipodi:role="line"
+         id="tspan234"
+         style="stroke-width:0.529167;fill:#000000;stroke:none"
+         x="49.755154"
+         y="126.68428">classify_sample_location</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:italic;font-weight:bold;font-size:7.05556px;line-height:0;font-family:'CMU Serif';-inkscape-font-specification:'CMU Serif Bold Italic';text-align:center;text-anchor:middle;fill:#000000;stroke:none;stroke-width:0.529167;paint-order:stroke fill markers"
+       x="1.5309278"
+       y="174.90851"
+       id="text290"><tspan
+         sodipodi:role="line"
+         id="tspan288"
+         style="stroke-width:0.529167"
+         x="1.5309297"
+         y="174.90851">get_info_from_accession</tspan></text>
+    <path
+       style="fill:none;stroke:#000000;stroke-width:1.129;paint-order:stroke fill markers;stroke-dasharray:none;marker-end:url(#Arrow1)"
+       d="M 25.260309,136.25258 5.7409794,164.57474"
+       id="path393" />
+    <text
+       xml:space="preserve"
+       style="font-style:italic;font-weight:bold;font-size:7.05556px;line-height:0;font-family:'CMU Serif';-inkscape-font-specification:'CMU Serif Bold Italic';text-align:center;text-anchor:middle;fill:#000000;stroke:none;stroke-width:1.129;stroke-dasharray:none;paint-order:stroke fill markers"
+       x="-116.73325"
+       y="220.83633"
+       id="text1182"><tspan
+         sodipodi:role="line"
+         id="tspan1180"
+         style="fill:#000000;stroke:none;stroke-width:1.129"
+         x="-116.73325"
+         y="220.83633">pubmedID</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:italic;font-weight:bold;font-size:7.05556px;line-height:0;font-family:'CMU Serif';-inkscape-font-specification:'CMU Serif Bold Italic';text-align:center;text-anchor:middle;fill:#000000;stroke:none;stroke-width:1.129;stroke-dasharray:none;paint-order:stroke fill markers"
+       x="115.20232"
+       y="219.68813"
+       id="text1294"><tspan
+         sodipodi:role="line"
+         id="tspan1292"
+         style="stroke-width:1.129"
+         x="115.20232"
+         y="219.68813">isolate</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:italic;font-weight:bold;font-size:7.05556px;line-height:1;font-family:'CMU Serif';-inkscape-font-specification:'CMU Serif Bold Italic';text-align:center;text-anchor:middle;fill:#000000;stroke:none;stroke-width:1.129;stroke-dasharray:none;paint-order:stroke fill markers"
+       x="-1.9136608"
+       y="215.47809"
+       id="text1298"><tspan
+         sodipodi:role="line"
+         id="tspan1296"
+         style="stroke-width:1.129"
+         x="-1.9136608"
+         y="215.47809">f&quot;error: Could not retrieve </tspan><tspan
+         sodipodi:role="line"
+         style="stroke-width:1.129"
+         x="-1.9136646"
+         y="222.53365"
+         id="tspan1300">PubMed ID for accession {accession}&quot;</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:italic;font-weight:bold;font-size:7.05556px;line-height:0;font-family:'CMU Serif';-inkscape-font-specification:'CMU Serif Bold Italic';text-align:center;text-anchor:middle;fill:#000000;stroke:none;stroke-width:1.129;stroke-dasharray:none;paint-order:stroke fill markers"
+       x="182.56314"
+       y="219.68811"
+       id="text1304"><tspan
+         sodipodi:role="line"
+         id="tspan1302"
+         style="stroke-width:1.129"
+         x="182.56314"
+         y="219.68811">&quot;UNKNOWN_ISOLATE&quot;</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:italic;font-weight:bold;font-size:7.05556px;line-height:0;font-family:'CMU Serif';-inkscape-font-specification:'CMU Serif Bold Italic';text-align:center;text-anchor:middle;fill:#000000;stroke:none;stroke-width:1.129;stroke-dasharray:none;paint-order:stroke fill markers"
+       x="-219.68813"
+       y="263.31961"
+       id="text1308"><tspan
+         sodipodi:role="line"
+         id="tspan1306"
+         style="stroke-width:1.129"
+         x="-219.68813"
+         y="263.31961">get_doi_from_pubmed_id</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:italic;font-weight:bold;font-size:7.05556px;line-height:0;font-family:'CMU Serif';-inkscape-font-specification:'CMU Serif Bold Italic';text-align:center;text-anchor:middle;fill:#000000;stroke:none;stroke-width:1.129;stroke-dasharray:none;paint-order:stroke fill markers"
+       x="-126.30154"
+       y="264.08505"
+       id="text1312"><tspan
+         sodipodi:role="line"
+         id="tspan1310"
+         style="stroke-width:1.129"
+         x="-126.30154"
+         y="264.08505">doi</tspan></text>
+    <path
+       style="fill:none;stroke:#000000;stroke-width:1.129;stroke-dasharray:none;paint-order:stroke fill markers"
+       d="m -120.56057,227.34278 -2.29639,19.1366"
+       id="path1314" />
+    <text
+       xml:space="preserve"
+       style="font-style:italic;font-weight:bold;font-size:7.05556px;line-height:1;font-family:'CMU Serif';-inkscape-font-specification:'CMU Serif Bold Italic';text-align:center;text-anchor:middle;fill:#000000;stroke:none;stroke-width:1.129;stroke-dasharray:none;paint-order:stroke fill markers"
+       x="-2.679121"
+       y="257.57861"
+       id="text1318"><tspan
+         sodipodi:role="line"
+         id="tspan1316"
+         style="fill:#000000;stroke:none;stroke-width:1.129"
+         x="-2.6791172"
+         y="257.57861">f&quot;error: DOI not found for this accession. </tspan><tspan
+         sodipodi:role="line"
+         style="fill:#000000;stroke:none;stroke-width:1.129"
+         x="-2.679121"
+         y="264.63419"
+         id="tspan1320">Cannot fetch paper or context.&quot;</tspan></text>
+    <rect
+       style="fill:none;stroke:#000000;stroke-width:1.129;stroke-dasharray:none;paint-order:stroke fill markers"
+       id="rect1374"
+       width="63.916237"
+       height="72.336334"
+       x="-153.47551"
+       y="203.99614" />
+    <text
+       xml:space="preserve"
+       style="font-style:italic;font-weight:bold;font-size:7.05556px;line-height:0;font-family:'CMU Serif';-inkscape-font-specification:'CMU Serif Bold Italic';text-align:center;text-anchor:middle;fill:#000000;stroke:none;stroke-width:1.129;stroke-dasharray:none;paint-order:stroke fill markers"
+       x="-121.70876"
+       y="199.02061"
+       id="text1378"><tspan
+         sodipodi:role="line"
+         id="tspan1376"
+         style="fill:#000000;stroke:none;stroke-width:1.129"
+         x="-121.70876"
+         y="199.02061">get_paper_text</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:italic;font-weight:bold;font-size:7.05556px;line-height:0;font-family:'CMU Serif';-inkscape-font-specification:'CMU Serif Bold Italic';text-align:center;text-anchor:middle;fill:#000000;stroke:none;stroke-width:1.129;stroke-dasharray:none;paint-order:stroke fill markers"
+       x="-170.3157"
+       y="333.35953"
+       id="text1382"><tspan
+         sodipodi:role="line"
+         id="tspan1380"
+         style="stroke-width:1.129"
+         x="-170.3157"
+         y="333.35953">textsToExtract</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:italic;font-weight:bold;font-size:7.05556px;line-height:0;font-family:'CMU Serif';-inkscape-font-specification:'CMU Serif Bold Italic';text-align:center;text-anchor:middle;fill:#000000;stroke:none;stroke-width:1.129;stroke-dasharray:none;paint-order:stroke fill markers"
+       x="-5.3582525"
+       y="330.68042"
+       id="text1386"><tspan
+         sodipodi:role="line"
+         id="tspan1384"
+         style="stroke-width:1.129"
+         x="-5.3582497"
+         y="330.68042">&quot;error&quot;: f&quot;No texts extracted for DOI {doi}&quot;</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:italic;font-weight:bold;font-size:7.05556px;line-height:0;font-family:'CMU Serif';-inkscape-font-specification:'CMU Serif Bold Italic';text-align:center;text-anchor:middle;fill:#000000;stroke:none;stroke-width:1.129;stroke-dasharray:none;paint-order:stroke fill markers"
+       x="-283.98712"
+       y="325.32217"
+       id="text1390"><tspan
+         sodipodi:role="line"
+         id="tspan1388"
+         style="stroke-width:1.129"
+         x="-283.98712"
+         y="325.32217">data/id</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:italic;font-weight:bold;font-size:7.05556px;line-height:0;font-family:'CMU Serif';-inkscape-font-specification:'CMU Serif Bold Italic';text-align:center;text-anchor:middle;fill:#000000;stroke:none;stroke-width:1.129;stroke-dasharray:none;paint-order:stroke fill markers"
+       x="-270.20877"
+       y="141.99356"
+       id="text1396"><tspan
+         sodipodi:role="line"
+         id="tspan1394"
+         style="stroke-width:1.129"
+         x="-270.20877"
+         y="141.99356">extractHTML(&quot;&quot;, link)</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:italic;font-weight:bold;font-size:7.05556px;line-height:0;font-family:'CMU Serif';-inkscape-font-specification:'CMU Serif Bold Italic';text-align:center;text-anchor:middle;fill:#000000;stroke:none;stroke-width:1.129;stroke-dasharray:none;paint-order:stroke fill markers"
+       x="-269.4433"
+       y="156.9201"
+       id="text1400"><tspan
+         sodipodi:role="line"
+         id="tspan1398"
+         style="stroke-width:1.129"
+         x="-269.4433"
+         y="156.9201">jsonSM</tspan></text>
+  </g>
+</svg>
