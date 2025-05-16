@@ -47,28 +47,26 @@ Entrez.email = "your_email@example.com"
 
 def get_info_from_accession(accession):
     try:
+        # Try to fetch text from the nucleotide core database in Medline format
         handle = Entrez.efetch(db="nuccore", id=accession, rettype="medline", retmode="text")
         text = handle.read()
         handle.close()
 
-        # Extract PUBMED ID from the Medline text
-        pubmed_match = re.search(r'PUBMED\s+(\d+)', text)
-        pubmed_id = pubmed_match.group(1) if pubmed_match else ""
-
-        # Extract isolate if available
-        isolate_match = re.search(r'/isolate="([^"]+)"', text)
-        if not isolate_match:
-            isolate_match = re.search(r'isolate\s+([A-Za-z0-9_-]+)', text)
-        isolate = isolate_match.group(1) if isolate_match else ""
-
-        if not pubmed_id:
+        # Extract PUBMED IDs from text
+        pubmed_ids = re.findall(r'PUBMED\s+(\d+)', text)
+        # Extract isolate from text
+        isolate_matches = list(set([i.split()[0] for i in re.findall(r'(?:/isolate="|isolate\s+)([A-Za-z0-9 _-]+)"?', text)]))
+        
+        if not pubmed_ids:
             print(f"⚠️ No PubMed ID found for accession {accession}")
+        if not isolate_matches:
+            print(f"⚠️ No isolate info for accession {accession}")
 
-        return pubmed_id, isolate
+        return pubmed_ids, isolate_matches
 
     except Exception as e:
         print("❌ Entrez error:", e)
-        return "", ""
+        return [] , []
 # Step 2: Get doi link to access the paper
 '''def get_doi_from_pubmed_id(pubmed_id):
     cmd = f'{os.environ["HOME"]}/edirect/esummary -db pubmed -id {pubmed_id} -format medline | grep -i "AID"'
@@ -82,78 +80,85 @@ def get_info_from_accession(accession):
         return match.group(0)
     else:
         return None  # or raise an Exception with a helpful message'''
-
-def get_doi_from_pubmed_id(pubmed_id):
-    try:
-        handle = Entrez.efetch(db="pubmed", id=pubmed_id, rettype="medline", retmode="text")
-        records = list(Medline.parse(handle))
-        handle.close()
-
-        if not records:
-            return None
-        
-        record = records[0]
-        if "AID" in record:
-            for aid in record["AID"]:
-                if "[doi]" in aid:
-                    return aid.split(" ")[0]  # extract the DOI
-
-        return None
-
-    except Exception as e:
-        print(f"❌ Failed to get DOI from PubMed ID {pubmed_id}: {e}")
+### pubmed_ids is a list from get_info_from_accession, list might be empty
+def get_doi_from_pubmed_id(pubmed_ids):
+    dois = {}
+    for pubmed_id in pubmed_ids:
+        try:
+            handle = Entrez.efetch(db="pubmed", id=pubmed_id, rettype="medline", retmode="text")
+            records = list(Medline.parse(handle))
+            handle.close()
+            if not records:
+                print("Invalid PUBMED ID or no record for this ID or Entrez blocked")
+            record = records[0]
+            if "AID" in record:
+                for aid in record["AID"]:
+                    if "[doi]" in aid:
+                        dois[pubmed_id] = ( aid.split(" ")[0]  )# extract the DOI
+            else: print("No DOI in record")
+    
+        except Exception as e:
+            print(f"❌ Failed to get DOI from PubMed ID {pubmed_id}: {e}")
+    if dois:
+        return dois
+    else:
         return None
 
 
 # Step 3: Extract Text: Get the paper (html text), sup. materials (pdf, doc, excel) and do text-preprocessing
 # Step 3.1: Extract Text
-def get_paper_text(doi,id):
+# DOIs is a dict with index = id and value = doi or a NoneType
+def get_paper_text(dois):
   # create the temporary folder to contain the texts
-  cmd = f'mkdir data/{id}'
-  result = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-  saveLinkFolder = "data/"+id
-
-  link = 'https://doi.org/' + doi
-  '''textsToExtract = { "doiLink":"paperText"
-                        "file1.pdf":"text1",
-                        "file2.doc":"text2",
-                        "file3.xlsx":excelText3'''
-  textsToExtract = {}
-  # get the file to create listOfFile for each id
-  html = extractHTML.HTML("",link)
-  jsonSM = html.getSupMaterial()
-  text = ""
-  links  = [link] + sum((jsonSM[key] for key in jsonSM),[])
-  #print(links)
-  for l in links:
-    # get the main paper
-    if l == link:
-      text = html.getListSection()
-      textsToExtract[link] = text
-    elif l.endswith(".pdf"):
-      p = pdf.PDF(l,saveLinkFolder,doi)
-      f = p.openPDFFile()
-      pdf_path = saveLinkFolder + "/" + l.split("/")[-1]
-      doc = fitz.open(pdf_path)
-      text = "\n".join([page.get_text() for page in doc])
-      textsToExtract[l] = text
-    elif l.endswith(".doc") or l.endswith(".docx"):
-      d = wordDoc.wordDoc(l,saveLinkFolder)
-      text = d.extractTextByPage()
-      textsToExtract[l] = text
-    elif l.split(".")[-1].lower() in "xlsx":
-      wc = word2vec.word2Vec()
-      corpus = wc.tableTransformToCorpusText([],l)
-      text = ''
-      for c in corpus:
-        para = corpus[c]
-        for words in para:
-          text += " ".join(words)
-      textsToExtract[l] = text
-  # delete folder after finishing getting text
-  cmd = f'rm -r data/{id}'
-  result = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-  return textsToExtract
+  if dois: 
+      textsToExtract = {}
+      '''textsToExtract = { "doiLink":"paperText"
+                            "file1.pdf":"text1",
+                            "file2.doc":"text2",
+                            "file3.xlsx":excelText3'''
+      for pubmed_id in dois:
+          cmd = f'mkdir data/{pubmed_id}'
+          result = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+          saveLinkFolder = "data/"+pubmed_id
+        
+          link = 'https://doi.org/' + dois[pubmed_id]
+          
+          # get the file to create listOfFile for each id
+          html = extractHTML.HTML("",link)
+          jsonSM = html.getSupMaterial()
+          text = ""
+          links  = [link] + sum((jsonSM[key] for key in jsonSM),[])
+          #print(links)
+          for l in links:
+            # get the main paper
+            if l == link:
+              text = html.getListSection()
+              textsToExtract[link] = text
+            elif l.endswith(".pdf"):
+              p = pdf.PDF(l,saveLinkFolder,dois[pubmed_id])
+              f = p.openPDFFile()
+              pdf_path = saveLinkFolder + "/" + l.split("/")[-1]
+              doc = fitz.open(pdf_path)
+              text = "\n".join([page.get_text() for page in doc])
+              textsToExtract[l] = text
+            elif l.endswith(".doc") or l.endswith(".docx"):
+              d = wordDoc.wordDoc(l,saveLinkFolder)
+              text = d.extractTextByPage()
+              textsToExtract[l] = text
+            elif l.split(".")[-1].lower() in "xlsx":
+              wc = word2vec.word2Vec()
+              corpus = wc.tableTransformToCorpusText([],l)
+              text = ''
+              for c in corpus:
+                para = corpus[c]
+                for words in para:
+                  text += " ".join(words)
+              textsToExtract[l] = text
+          # delete folder after finishing getting text
+          cmd = f'rm -r data/{pubmed_id}'
+          result = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+      return textsToExtract
+  else: print("⚠️ No DOI to get text")
 # Step 3.2: Extract context
 def extract_context(text, keyword, window=500):
     idx = text.find(keyword)
@@ -240,83 +245,99 @@ def infer_location_fromNCBI(accession):
         handle = Entrez.efetch(db="nuccore", id=accession, rettype="medline", retmode="text")
         text = handle.read()
         handle.close()
-        match = re.search(r'/(geo_loc_name|country|location)\s*=\s*"([^"]+)"', text)
+        match = re.findall(r'/(geo_loc_name|country|location)\s*=\s*"([^"]+)"', text)
         if match:
-            return match.group(2), match.group(0)  # This is the value like "Brunei"
-        return None
+            return [value for key, value in match], [key for key, value in match]  # This is the value like "Brunei"
+        else:
+            return [] , []
 
     except Exception as e:
         print("❌ Entrez error:", e)
-        return "",""
+        return [],[]
 
 
 # STEP 5: Main pipeline: accession -> 1. get pubmed id and isolate -> 2. get doi -> 3. get text -> 4. prediction -> 5. output: inferred location + explanation + confidence score
 def classify_sample_location(accession):
-  outputs = {}
-  keyword, context, location, qa_result, haplo_result = "", "", "", "", ""
-  # Step 1: get pubmed id and isolate
-  pubmedID, isolate = get_info_from_accession(accession)
-  if not pubmedID:
-    return {"error": f"Could not retrieve PubMed ID for accession {accession}"}
-  if not isolate:
-    isolate = "UNKNOWN_ISOLATE"
-  # Step 2: get doi
-  doi = get_doi_from_pubmed_id(pubmedID)
-  if not doi:
-    return {"error": "DOI not found for this accession. Cannot fetch paper or context."}
-
-  # Step 3: get text
-  '''textsToExtract = { "doiLink":"paperText"
-                        "file1.pdf":"text1",
-                        "file2.doc":"text2",
-                        "file3.xlsx":excelText3'''
-  textsToExtract = get_paper_text(doi,pubmedID)
-  if not textsToExtract:
-    return {"error": f"No texts extracted for DOI {doi}"}
-
-  # Step 4: prediction
-  outputs[accession] = {}
-  outputs[isolate] = {}
-  # 4.0 Infer from NCBI
-  location, outputNCBI = infer_location_fromNCBI(accession)
-  NCBI_result = {
-      "source": "NCBI",
-      "sample_id": accession,
-      "predicted_location": location,
-      "context_snippet": outputNCBI}
-  outputs[accession]["NCBI"]= {"NCBI": NCBI_result}
-  for key in textsToExtract:
-    text = textsToExtract[key]
+    outputs = {}
+    keyword, context, location, qa_result, haplo_result = "", "", "", "", ""
+    
+    ### First method (4.0): infer_location_fromNCBI(): Check direct info
+    """
+    Info directly searched in metadata by tags of /(geo_loc_name|country|location)
+    """
+    outputs[accession] = {}
+    location, search_key = infer_location_fromNCBI(accession)
+    NCBI_result = {
+        "source": "NCBI",
+        "sample_id": accession,
+        "predicted_location": location,
+        "context_snippet": search_key}
+    outputs[accession]["NCBI"]= {"NCBI": NCBI_result}
+    
+    ### Other methods
+    """
+    Without direct info of the origin, more advanced methods needs retrieval of articles and from isolates info
+    """
+    # Step 1: get pubmed id and isolate
+    pubmed_ids, isolates = get_info_from_accession(accession)
+    if pubmed_ids: 
+    # Step 2: get doi
+        dois = get_doi_from_pubmed_id(pubmed_ids)
+        if dois:
+    # Step 3: get text
+            '''textsToExtract = { "doiLink":"paperText"
+                                  "file1.pdf":"text1",
+                                  "file2.doc":"text2",
+                                  "file3.xlsx":excelText3'''
+            textsToExtract = get_paper_text(dois)
+            if textsToExtract:
+    # Step 4: prediction
+                for key in textsToExtract:
+                  text = textsToExtract[key]
     # try accession number first
-    outputs[accession][key] = {}
-    keyword = accession
-    context = extract_context(text, keyword, window=500)
-    # 4.1: Using a HuggingFace model (question-answering)
-    location = infer_location_fromQAModel(context, question=f"Where is the mtDNA sample {keyword} from?")
-    qa_result = {
-        "source": key,
-        "sample_id": keyword,
-        "predicted_location": location,
-        "context_snippet": context
-    }
-    outputs[keyword][key]["QAModel"] = qa_result
-    # 4.2: Infer from haplogroup
-    haplo_result = classify_mtDNA_sample_from_haplo(context)
-    outputs[keyword][key]["haplogroup"] = haplo_result
+                  outputs[accession][key] = {}
+                  keyword = accession
+                  context = extract_context(text, keyword, window=500)
+          # Method 4.1: Using a HuggingFace model (question-answering)
+                  location = infer_location_fromQAModel(context, question=f"Where is the mtDNA sample {keyword} from?")
+                  qa_result = {
+                      "source": key,
+                      "sample_id": keyword,
+                      "predicted_location": location,
+                      "context_snippet": context
+                  }
+                  outputs[keyword][key]["QAModel"] = qa_result
+                  
+                  
+          # Method 4.2: Infer from haplogroup
+                  haplo_result = classify_mtDNA_sample_from_haplo(context)
+                  outputs[keyword][key]["haplogroup"] = haplo_result
+                  
     # try isolate
-    keyword = isolate
-    outputs[isolate][key] = {}
-    context = extract_context(text, keyword, window=500)
-    # 4.1.1: Using a HuggingFace model (question-answering)
-    location = infer_location_fromQAModel(context, question=f"Where is the mtDNA sample {keyword} from?")
-    qa_result = {
-        "source": key,
-        "sample_id": keyword,
-        "predicted_location": location,
-        "context_snippet": context
-    }
-    outputs[keyword][key]["QAModel"] = qa_result
-    # 4.2.1: Infer from haplogroup
-    haplo_result = classify_mtDNA_sample_from_haplo(context)
-    outputs[keyword][key]["haplogroup"] = haplo_result
-  return outputs
+                  if isolates: 
+                      for isolate in isolates: 
+                          outputs[isolate] = {}
+                          keyword = isolate
+                          outputs[isolate][key] = {}
+                          context = extract_context(text, keyword, window=500)
+                  # Method 4.1 again for isolate: Using a HuggingFace model (question-answering)
+                          location = infer_location_fromQAModel(context, question=f"Where is the mtDNA sample {keyword} from?")
+                          qa_result = {
+                              "source": key,
+                              "sample_id": keyword,
+                              "predicted_location": location,
+                              "context_snippet": context
+                          }
+                          outputs[keyword][key]["QAModel"] = qa_result
+                  # Method 4.2 again for isolate: Infer from haplogroup
+                          haplo_result = classify_mtDNA_sample_from_haplo(context)
+                          outputs[keyword][key]["haplogroup"] = haplo_result
+                  else: 
+                      outputs['isolate'] = "UNKNOWN_ISOLATE"  
+            else:
+                return {"error": f"No texts extracted for DOI {dois}"}
+        else:
+            return {"error": "DOI not found for this accession. Cannot fetch paper or context."}
+    else:
+        return {"error": f"Could not retrieve PubMed ID for accession {accession}"}
+    return outputs
