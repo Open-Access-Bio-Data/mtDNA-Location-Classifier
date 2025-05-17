@@ -10,7 +10,7 @@ import numpy as np
 import pickle
 import os
 os.getcwd()
-os.chdir('/home/h_k_linh/Desktop/mtDNA-Location-Classifier')
+os.chdir('/home/h_k_linh/Desktop/CodingWithVy/mtDNA-Location-Classifier')
 os.listdir()
 from mtdna_classifier import *
 #%%% Extract NC_ list from article
@@ -190,11 +190,126 @@ ls = ['Reference', 'pubmedID', 'title', 'year', 'recent or ancient', 'Author(s)'
 
 #%% Accession number with two publications:
 # accession = "FJ383757.1" 
-accession = "DQ112870.2" # only one PUBMED
+# accession = "DQ112870.2" # only one PUBMED
 # accession = "NC_012920" # standard
 # accession = "OP004741.1" # no PUBMED
+accession = "KX456972" # one of Vy's
 pubmed_ids, isolate_matches = get_info_from_accession(accession)
 dois = get_doi_from_pubmed_id(pubmed_ids)
-text = get_paper_text(dois)
+textToExtract = get_paper_text(dois)
+context = extract_context(text['https://static-content.springer.com/esm/art%3A10.1007%2Fs00439-016-1742-y/MediaObjects/439_2016_1742_MOESM2_ESM.pdf'], accession, window=500)
 infer_location_fromNCBI(accession)
 outputs = classify_sample_location(accession)
+
+#%% extractlocation()
+
+nlp = spacy.load("en_core_web_sm")
+text = textToExtract['https://doi.org/10.1007/s00439-016-1742-y']
+doc = nlp(text)
+locations = []
+for ent in doc.ents:
+    if ent.label_ == "GPE":  # GPE = Geopolitical Entity (location)
+        locations.append(ent.text)
+
+# infer_location_fromQAModel
+test = infer_location_fromQAModel(text, question=f"Where is the mtDNA sample {accession} from?", qa=qa)
+context = extract_context(text, accession, window=500)
+testcontext = infer_location_fromQAModel(context, question=f"Where is the mtDNA sample {accession} from?", qa=qa)
+
+
+
+
+#%% Dois that is bot blocked
+"""
+text returned was:
+    Just a moment...Enable JavaScript and cookies to continue
+doi:
+    https://doi.org/10.1534/genetics.105.043901
+of accession DQ112870.2
+"""
+htmlLink = "https://doi.org/10.1534/genetics.105.043901"
+
+#%%%
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+
+options = Options()
+options.add_argument("--headless=new") # Headless mode: no GUI
+options.add_argument("--no-sandbox")  # Sometimes needed in cloud environments
+options.add_argument("--disable-dev-shm-usage")  # Optional (needed for some systems)
+driver = webdriver.Chrome(options=options)
+driver.get(htmlLink)
+try:
+    WebDriverWait(driver, 100).until(EC.presence_of_element_located((By.TAG_NAME, "h2")))
+except:
+    print("⚠️ Timeout waiting for full page to load.")
+html = driver.page_source
+driver.quit()
+soup = BeautifulSoup(html, 'html.parser')
+
+# driver = wd.Chrome(options = options)
+# driver.implicitly_wait(1000)
+# driver.get(htmlLink)
+# soup = BeautifulSoup(driver.page_source, 'html.parser')
+soup.find_all('h2')
+#%%%
+import asyncio
+import requests
+from bs4 import BeautifulSoup
+from playwright.async_api import async_playwright
+
+async def fetch_rendered_html(url, from_doi=True, headless=False, wait_selector="h2", timeout=10000):
+    """
+    Fetch a fully rendered page using Playwright and return the parsed BeautifulSoup object.
+
+    Args:
+        url (str): A direct URL or a DOI link.
+        from_doi (bool): Whether to resolve the URL from a DOI redirect.
+        headless (bool): Whether to run browser in headless mode.
+        wait_selector (str): CSS selector to wait for (e.g. 'h2').
+        timeout (int): Max time to wait for selector in ms.
+
+    Returns:
+        BeautifulSoup object of the rendered page.
+    """
+
+    # Step 1: resolve DOI if needed
+    if from_doi:
+        try:
+            response = requests.head(url, allow_redirects=True)
+            final_url = response.url
+        except Exception as e:
+            raise RuntimeError(f"DOI resolution failed: {e}")
+    else:
+        final_url = url
+
+    print(f"🌐 Loading: {final_url}")
+
+    # Step 2: Playwright browser load
+    async with async_playwright() as p:
+        browser = await p.chromium.launch(headless=headless)
+        page = await browser.new_page()
+        await page.goto(final_url)
+
+        # Optional wait for specific content to ensure full render
+        try:
+            await page.wait_for_selector(wait_selector, timeout=timeout)
+        except Exception as e:
+            print(f"⚠️ Warning: {wait_selector} not found within {timeout}ms: {e}")
+
+        # Optional: scroll to help trigger lazy load
+        await page.mouse.wheel(0, 2000)
+        await page.wait_for_timeout(2000)
+
+        html_content = await page.content()
+        await browser.close()
+
+    # Step 3: Parse and return soup
+    soup = BeautifulSoup(html_content, 'html.parser')
+    return soup
+
+soup = await fetch_rendered_html("https://doi.org/10.1534/genetics.105.043901", from_doi=True) 
+soup.find_all('h2')

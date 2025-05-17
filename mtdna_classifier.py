@@ -167,10 +167,11 @@ def extract_context(text, keyword, window=500):
     return text[max(0, idx-window): idx+window]
 # Step 4: Classification for now (demo purposes)
 # 4.1: Using a HuggingFace model (question-answering)
-def infer_location_fromQAModel(context, question="Where is the mtDNA sample from?"):
+def infer_location_fromQAModel(context, question="Where is the mtDNA sample from?", qa = None):
     try:
-        qa = pipeline("question-answering", model="distilbert-base-uncased-distilled-squad")
-        result = qa({"context": context, "question": question})
+        # qa = pipeline("question-answering", model="distilbert-base-uncased-distilled-squad")
+        # result = qa({"context": context, "question": question})
+        result = qa(question=question, context=context)
         return result.get("answer", "Unknown")
     except Exception as e:
         return f"Error: {str(e)}"
@@ -247,13 +248,13 @@ def infer_location_fromNCBI(accession):
         handle.close()
         match = re.findall(r'/(geo_loc_name|country|location)\s*=\s*"([^"]+)"', text)
         if match:
-            return [value for key, value in match], [key for key, value in match]  # This is the value like "Brunei"
+            return ",".join([value for key, value in match]), ",".join([key for key, value in match])  # This is the value like "Brunei"
         else:
-            return [] , []
+            return "" , ""
 
     except Exception as e:
         print("❌ Entrez error:", e)
-        return [],[]
+        return "", ""
 
 
 # STEP 5: Main pipeline: accession -> 1. get pubmed id and isolate -> 2. get doi -> 3. get text -> 4. prediction -> 5. output: inferred location + explanation + confidence score
@@ -292,52 +293,55 @@ def classify_sample_location(accession):
             textsToExtract = get_paper_text(dois)
             if textsToExtract:
     # Step 4: prediction
+                # Prepare: load QA model once and for all
+                qa = pipeline("question-answering", model="distilbert-base-uncased-distilled-squad")
+                
                 for key in textsToExtract:
-                  text = textsToExtract[key]
-    # try accession number first
-                  outputs[accession][key] = {}
-                  keyword = accession
-                  context = extract_context(text, keyword, window=500)
-          # Method 4.1: Using a HuggingFace model (question-answering)
-                  location = infer_location_fromQAModel(context, question=f"Where is the mtDNA sample {keyword} from?")
-                  qa_result = {
-                      "source": key,
-                      "sample_id": keyword,
-                      "predicted_location": location,
-                      "context_snippet": context
-                  }
-                  outputs[keyword][key]["QAModel"] = qa_result
-                  
-                  
-          # Method 4.2: Infer from haplogroup
-                  haplo_result = classify_mtDNA_sample_from_haplo(context)
-                  outputs[keyword][key]["haplogroup"] = haplo_result
+                    text = textsToExtract[key]
+        # try accession number first
+                    outputs[accession][key] = {}
+                    keyword = accession
+                    context = extract_context(text, keyword, window=500)
+              # Method 4.1: Using a HuggingFace model (question-answering)
+                    location = infer_location_fromQAModel(context, question=f"Where is the mtDNA sample {keyword} from?")
+                    qa_result = {
+                        "source": key,
+                        "sample_id": keyword,
+                        "predicted_location": location,
+                        "context_snippet": context
+                    }
+                    outputs[keyword][key]["QAModel"] = qa_result
+                      
+                      
+              # Method 4.2: Infer from haplogroup
+                    haplo_result = classify_mtDNA_sample_from_haplo(context)
+                    outputs[keyword][key]["haplogroup"] = haplo_result
                   
     # try isolate
-                  if isolates: 
-                      for isolate in isolates: 
-                          outputs[isolate] = {}
-                          keyword = isolate
-                          outputs[isolate][key] = {}
-                          context = extract_context(text, keyword, window=500)
+                    if isolates: 
+                        for isolate in isolates: 
+                            outputs[isolate] = {}
+                            keyword = isolate
+                            outputs[isolate][key] = {}
+                            context = extract_context(text, keyword, window=500)
                   # Method 4.1 again for isolate: Using a HuggingFace model (question-answering)
-                          location = infer_location_fromQAModel(context, question=f"Where is the mtDNA sample {keyword} from?")
-                          qa_result = {
+                            location = infer_location_fromQAModel(context, question=f"Where is the mtDNA sample {keyword} from?", qa=qa)
+                            qa_result = {
                               "source": key,
                               "sample_id": keyword,
                               "predicted_location": location,
                               "context_snippet": context
-                          }
-                          outputs[keyword][key]["QAModel"] = qa_result
+                            }
+                            outputs[keyword][key]["QAModel"] = qa_result
                   # Method 4.2 again for isolate: Infer from haplogroup
-                          haplo_result = classify_mtDNA_sample_from_haplo(context)
-                          outputs[keyword][key]["haplogroup"] = haplo_result
-                  else: 
-                      outputs['isolate'] = "UNKNOWN_ISOLATE"  
+                            haplo_result = classify_mtDNA_sample_from_haplo(context)
+                            outputs[keyword][key]["haplogroup"] = haplo_result
+                    else: 
+                      print("UNKNOWN_ISOLATE")
             else:
-                return {"error": f"No texts extracted for DOI {dois}"}
+                print(f"error: No texts extracted for DOI {dois}")
         else:
-            return {"error": "DOI not found for this accession. Cannot fetch paper or context."}
+            print("error: DOI not found for this accession. Cannot fetch paper or context.")
     else:
-        return {"error": f"Could not retrieve PubMed ID for accession {accession}"}
+        print(f"error: Could not retrieve PubMed ID for accession {accession}")
     return outputs

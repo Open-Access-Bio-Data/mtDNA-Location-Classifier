@@ -5,32 +5,50 @@ import requests
 from DefaultPackages import openFile, saveFile
 from NER import cleanText
 import pandas as pd
+# selenium to escape bot block
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+
 class HTML():
   def __init__(self, htmlFile = [], htmlLink = []):
     self.htmlLink = htmlLink
     self.htmlFile = htmlFile
   def openHTMLFile(self):
-    soups = []
-    if self.htmlLink:  # not an empty list
-        for link in self.htmlLink:
-            r = requests.get(link)
-            soup = BeautifulSoup(r.content, 'html.parser')
-            soups.append(soup)
-    elif self.htmlFile:  # fallback to local files
-        for file_path in self.htmlFile:
-            with open(file_path, encoding='utf-8') as fp:
-                soup = BeautifulSoup(fp, 'html.parser')
-                soups.append(soup)
-    else:
-        print("⚠️ No HTML links or files provided.")
-    return soups  # list of BeautifulSoup objects
-    # if self.htmlLink != "None":
-    #   r = requests.get(self.htmlLink)
-    #   soup = BeautifulSoup(r.content, 'html.parser')
-    # else:
-    #   with open(self.htmlFile) as fp:
-    #     soup = BeautifulSoup(fp, 'html.parser')
-    # return soup
+      if self.htmlLink:
+          try:
+              r = requests.get(self.htmlLink, headers={"User-Agent": "Mozilla/5.0"}, timeout=10)
+              if "Just a moment" in r.text or "enable JavaScript" in r.text or r.status_code != 200:
+                  raise Exception("Blocked by JS or bot detection")
+              soup = BeautifulSoup(r.content, 'html.parser')
+              return soup
+          except:
+              # Fallback to Selenium
+              options = Options()
+              options.add_argument("--headless=new") # Headless mode: no GUI
+              options.add_argument("--no-sandbox")  # Sometimes needed in cloud environments
+              options.add_argument("--disable-dev-shm-usage")  # Optional (needed for some systems)
+              driver = webdriver.Chrome(options=options)
+              driver.get(self.htmlLink)
+              try:
+                  WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.TAG_NAME, "h2")))
+              except:
+                  print("⚠️ Timeout waiting for full page to load.")
+              html = driver.page_source
+              driver.quit()
+              soup = BeautifulSoup(html, 'html.parser')
+              return soup
+
+      elif self.htmlFile:
+          with open(self.htmlFile, encoding='utf-8') as fp:
+              soup = BeautifulSoup(fp, 'html.parser')
+              return soup
+
+      else:
+          raise ValueError("No HTML link or file provided.")
+
   def getText(self):
     soup = self.openHTMLFile()
     s = soup.find_all("html")
