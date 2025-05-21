@@ -1,0 +1,18 @@
+            getListSection()
+            ├── openHTMLFile()
+            ├── mergeTextInJson()
+            └── getText()
+
+getReference()
+└── getListSection()
+
+getSupMaterial()
+└── openHTMLFile()
+
+extractTable()
+└── openHTMLFile()
+
+getText()
+└── openHTMLFile()
+
+mergeTextInJson() → utility function, called by getListSection()
