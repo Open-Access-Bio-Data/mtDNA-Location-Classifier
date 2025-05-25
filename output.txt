@@ -1,0 +1,176 @@
+=== Detailed Results ===
+MF362736.1 (accession number), NCBI, NCBI, Armenia, /geo_loc_name="Armenia"
+MF362736.1 (accession number), QAModel, <a href="https://doi.org/10.1016/j.cub.2017.05.087" target="_blank" style="color: blue; text-decoration: underline;">https://doi.org/10.1016/j.cub.2017.05.087</a>, Sample ID not found, Sample ID not found.
+MF362736.1 (accession number), haplogroup, The region of haplogroup is inferred
+by using this source: Unknown, Sample, Unknown
+rise396_mt (isolate of accession), QAModel, <a href="https://doi.org/10.1016/j.cub.2017.05.087" target="_blank" style="color: blue; text-decoration: underline;">https://doi.org/10.1016/j.cub.2017.05.087</a>, Sample ID not found, Sample ID not found.
+rise396_mt (isolate of accession), haplogroup, The region of haplogroup is inferred
+by using this source: Unknown, Sample, Unknown
+MF362738.1 (accession number), NCBI, NCBI, Armenia, /geo_loc_name="Armenia"
+MF362738.1 (accession number), QAModel, <a href="https://doi.org/10.1016/j.cub.2017.05.087" target="_blank" style="color: blue; text-decoration: underline;">https://doi.org/10.1016/j.cub.2017.05.087</a>, Sample ID not found, Sample ID not found.
+MF362738.1 (accession number), haplogroup, The region of haplogroup is inferred
+by using this source: Unknown, Sample, Unknown
+rise407_mt (isolate of accession), QAModel, <a href="https://doi.org/10.1016/j.cub.2017.05.087" target="_blank" style="color: blue; text-decoration: underline;">https://doi.org/10.1016/j.cub.2017.05.087</a>, Sample ID not found, Sample ID not found.
+rise407_mt (isolate of accession), haplogroup, The region of haplogroup is inferred
+by using this source: Unknown, Sample, Unknown
+MF362739.1 (accession number), NCBI, NCBI, Armenia, /geo_loc_name="Armenia"
+MF362739.1 (accession number), QAModel, <a href="https://doi.org/10.1016/j.cub.2017.05.087" target="_blank" style="color: blue; text-decoration: underline;">https://doi.org/10.1016/j.cub.2017.05.087</a>, Sample ID not found, Sample ID not found.
+MF362739.1 (accession number), haplogroup, The region of haplogroup is inferred
+by using this source: Unknown, Sample, Unknown
+rise408_mt (isolate of accession), QAModel, <a href="https://doi.org/10.1016/j.cub.2017.05.087" target="_blank" style="color: blue; text-decoration: underline;">https://doi.org/10.1016/j.cub.2017.05.087</a>, Sample ID not found, Sample ID not found.
+rise408_mt (isolate of accession), haplogroup, The region of haplogroup is inferred
+by using this source: Unknown, Sample, Unknown
+KU131308 (accession number), NCBI, NCBI, Brunei, /geo_loc_name="Brunei"
+KU131308 (accession number), QAModel, <a href="https://doi.org/10.1007/s00439-015-1620-z" target="_blank" style="color: blue; text-decoration: underline;">https://doi.org/10.1007/s00439-015-1620-z</a>, GenBank, t (unavailable at the start of this study). We performed whole-mtDNA sequencing as previously described (Torroni et al. 2001) using an ABI 48-capillary 3730 DNA Analyser (Taipei) an ABI 16-capillary 3130XL DNA Analyser (Leeds) and an ABI 16-capillary 3100 DNA Analyser (Porto). Details on the new and
+KU131308 (accession number), haplogroup, The region of haplogroup is inferred
+by using this source: EMPOP, M7, East Asia
+KU131308 (accession number), QAModel, <a href="https://static-content.springer.com/esm/art%3A10.1007%2Fs00439-015-1620-z/MediaObjects/439_2015_1620_MOESM1_ESM.pdf" target="_blank" style="color: blue; text-decoration: underline;">https://static-content.springer.com/esm/art%3A10.1007%2Fs00439-015-1620-z/MediaObjects/439_2015_1620_MOESM1_ESM.pdf</a>, Sample ID not found, Sample ID not found.
+KU131308 (accession number), haplogroup, The region of haplogroup is inferred
+by using this source: Unknown, Sample, Unknown
+KU131308 (accession number), QAModel, <a href="https://static-content.springer.com/esm/art%3A10.1007%2Fs00439-015-1620-z/MediaObjects/439_2015_1620_MOESM2_ESM.xls" target="_blank" style="color: blue; text-decoration: underline;">https://static-content.springer.com/esm/art%3A10.1007%2Fs00439-015-1620-z/MediaObjects/439_2015_1620_MOESM2_ESM.xls</a>, Sample ID not found, Sample ID not found.
+KU131308 (accession number), haplogroup, The region of haplogroup is inferred
+by using this source: Unknown, Sample, Unknown
+BRU18 (isolate of accession), QAModel, <a href="https://doi.org/10.1007/s00439-015-1620-z" target="_blank" style="color: blue; text-decoration: underline;">https://doi.org/10.1007/s00439-015-1620-z</a>, Sample ID not found, Sample ID not found.
+BRU18 (isolate of accession), haplogroup, The region of haplogroup is inferred
+by using this source: Unknown, Sample, Unknown
+BRU18 (isolate of accession), QAModel, <a href="https://static-content.springer.com/esm/art%3A10.1007%2Fs00439-015-1620-z/MediaObjects/439_2015_1620_MOESM1_ESM.pdf" target="_blank" style="color: blue; text-decoration: underline;">https://static-content.springer.com/esm/art%3A10.1007%2Fs00439-015-1620-z/MediaObjects/439_2015_1620_MOESM1_ESM.pdf</a>, Borneo, , NA18138, NA18149, NA18152, 
+NA18674, NA18707 
+ Chinese in Denver, 
+USA 
+[86] 
+NA17971, NA18124, NA18550, NA18574, NA18582, 
+NA18618, NA18636, NA18638, NA18639, NA18644, 
+NA18756, NA18769, NA18771 
+Han Chinese in Beijing  
+[86] 
+NA18755 
+Beijing Han Chinese 
+[86] 
+NA18940, NA18943, NA18952, NA18953
+BRU18 (isolate of accession), haplogroup, The region of haplogroup is inferred
+by using this source: Unknown, Denver, Unknown
+BRU18 (isolate of accession), QAModel, <a href="https://static-content.springer.com/esm/art%3A10.1007%2Fs00439-015-1620-z/MediaObjects/439_2015_1620_MOESM2_ESM.xls" target="_blank" style="color: blue; text-decoration: underline;">https://static-content.springer.com/esm/art%3A10.1007%2Fs00439-015-1620-z/MediaObjects/439_2015_1620_MOESM2_ESM.xls</a>, Sample ID not found, Sample ID not found.
+BRU18 (isolate of accession), haplogroup, The region of haplogroup is inferred
+by using this source: Unknown, Sample, Unknown
+MW291678 (accession number), NCBI, NCBI, Argentina, /geo_loc_name="Argentina"
+MN006856 (accession number), NCBI, NCBI, Not found, Not found
+
+=== Summary ===
+**MF362736.1**
+### 🧭 Location Frequency Summary
+After counting all predicted and inferred locations:
+
+- **Armenia**: 1 times
+
+**Final Suggested Location:** 🗺️ **Armenia** (mentioned 1 times)
+
+---
+
+**MF362738.1**
+### 🧭 Location Frequency Summary
+After counting all predicted and inferred locations:
+
+- **Armenia**: 1 times
+
+**Final Suggested Location:** 🗺️ **Armenia** (mentioned 1 times)
+
+---
+
+**MF362739.1**
+### 🧭 Location Frequency Summary
+After counting all predicted and inferred locations:
+
+- **Armenia**: 1 times
+
+**Final Suggested Location:** 🗺️ **Armenia** (mentioned 1 times)
+
+---
+
+**KU131308**
+### 🧭 Location Frequency Summary
+After counting all predicted and inferred locations:
+
+- **Brunei**: 1 times
+- **GenBank**: 1 times
+- **Borneo**: 1 times
+- **East Asia**: 1 times
+
+**Final Suggested Location:** 🗺️ **Brunei** (mentioned 1 times)
+
+---
+
+**MW291678**
+### 🧭 Location Frequency Summary
+After counting all predicted and inferred locations:
+
+- **Argentina**: 1 times
+
+**Final Suggested Location:** 🗺️ **Argentina** (mentioned 1 times)
+
+---
+
+**MN006856**
+### 🧭 Location Frequency Summary
+After counting all predicted and inferred locations:
+
+- **Not found**: 1 times
+
+**Final Suggested Location:** 🗺️ **Not found** (mentioned 1 times)
+
+=== Ancient/Modern Flag ===
+**MF362736.1**
+### 🏺 Ancient/Modern Flag
+**Ancient**
+
+_Explanation:_ Flagged as ancient due to keywords: tomb, skeleton from NCBI
+(/isolation_source="Tomb 6; skeleton 1" /specimen_voucher="Kapan;Tomb 6; skeleton 1" )
+
+---
+
+**MF362738.1**
+### 🏺 Ancient/Modern Flag
+**Ancient**
+
+_Explanation:_ https://doi.org/10.1016/j.cub.2017.05.087:
+Mixed context, leaning ancient due to: ancient, archaeological, bronze age, iron age, tomb, skeleton, carbon dating, adna, site
+
+
+
+---
+
+**MF362739.1**
+### 🏺 Ancient/Modern Flag
+**Ancient**
+
+_Explanation:_ https://doi.org/10.1016/j.cub.2017.05.087:
+Mixed context, leaning ancient due to: ancient, archaeological, bronze age, iron age, tomb, skeleton, carbon dating, adna, site
+
+
+
+---
+
+**KU131308**
+### 🏺 Ancient/Modern Flag
+**Modern**
+
+_Explanation:_ https://doi.org/10.1007/s00439-015-1620-z:
+Mixed context, leaning modern due to: we analysed, new sequences, published data, sink population, genome-wide data
+
+
+
+---
+
+**MW291678**
+### 🏺 Ancient/Modern Flag
+**Ancient**
+
+_Explanation:_ Flagged as ancient due to keywords: archaeological from NCBI
+(/isolation_source="archaeological human bone" )
+
+---
+
+**MN006856**
+### 🏺 Ancient/Modern Flag
+****
+
+_Explanation:_ 

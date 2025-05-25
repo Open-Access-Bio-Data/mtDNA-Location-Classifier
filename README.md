@@ -23,7 +23,7 @@ If installed using mamba (recommended):
 ```bash
 mamba env create -f env.yaml
 ``` 
-If not, check current python version in terminal and make sure that it is python version 3.11.12, then run
+If not, check current python version in terminal and make sure that it is python version 3.10, then run
 ```bash
 pip install -r requirements.txt
 ```
