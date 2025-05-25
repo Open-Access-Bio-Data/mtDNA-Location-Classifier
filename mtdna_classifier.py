@@ -12,6 +12,9 @@ from NER.WordDoc import wordDoc
 from NER.html import extractHTML
 from NER.word2Vec import word2vec
 from transformers import pipeline
+import urllib.parse, requests
+from pathlib import Path
+from upgradeClassify import filter_context_for_sample, infer_location_for_sample
 # Set your email (required by NCBI Entrez)
 #Entrez.email = "your-email@example.com"
 import nltk
@@ -107,67 +110,83 @@ def get_doi_from_pubmed_id(pubmed_ids):
 
 # Step 3: Extract Text: Get the paper (html text), sup. materials (pdf, doc, excel) and do text-preprocessing
 # Step 3.1: Extract Text
-# DOIs is a dict with index = id and value = doi or a NoneType
-def get_paper_text(dois):
+def get_paper_text(doi,id):
   # create the temporary folder to contain the texts
-  if dois: 
-      textsToExtract = {}
-      '''textsToExtract = { "doiLink":"paperText"
-                            "file1.pdf":"text1",
-                            "file2.doc":"text2",
-                            "file3.xlsx":excelText3'''
-      for pubmed_id in dois:
-          cmd = f'mkdir data/{pubmed_id}'
-          result = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-          saveLinkFolder = "data/"+pubmed_id
-        
-          link = 'https://doi.org/' + dois[pubmed_id]
-          
-          # get the file to create listOfFile for each id
-          html = extractHTML.HTML("",link)
-          jsonSM = html.getSupMaterial()
-          text = ""
-          links  = [link] + sum((jsonSM[key] for key in jsonSM),[])
-          #print(links)
-          for l in links:
-            # get the main paper
-            if l == link:
-              text = html.getListSection()
-              textsToExtract[link] = text
-            elif l.endswith(".pdf"):
-              p = pdf.PDF(l,saveLinkFolder,dois[pubmed_id])
-              f = p.openPDFFile()
-              pdf_path = saveLinkFolder + "/" + l.split("/")[-1]
-              doc = fitz.open(pdf_path)
-              text = "\n".join([page.get_text() for page in doc])
-              textsToExtract[l] = text
-            elif l.endswith(".doc") or l.endswith(".docx"):
-              d = wordDoc.wordDoc(l,saveLinkFolder)
-              text = d.extractTextByPage()
-              textsToExtract[l] = text
-            elif l.split(".")[-1].lower() in "xlsx":
-              wc = word2vec.word2Vec()
-              corpus = wc.tableTransformToCorpusText([],l)
-              text = ''
-              for c in corpus:
-                para = corpus[c]
-                for words in para:
-                  text += " ".join(words)
-              textsToExtract[l] = text
-          # delete folder after finishing getting text
-          cmd = f'rm -r data/{pubmed_id}'
-          result = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-      return textsToExtract
-  else: print("⚠️ No DOI to get text")
+  cmd = f'mkdir data/{id}'
+  result = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+  saveLinkFolder = "data/"+id
+
+  link = 'https://doi.org/' + doi
+  '''textsToExtract = { "doiLink":"paperText"
+                        "file1.pdf":"text1",
+                        "file2.doc":"text2",
+                        "file3.xlsx":excelText3'''
+  textsToExtract = {}
+  # get the file to create listOfFile for each id
+  html = extractHTML.HTML("",link)
+  jsonSM = html.getSupMaterial()
+  text = ""
+  links  = [link] + sum((jsonSM[key] for key in jsonSM),[])
+  #print(links)
+  for l in links:
+    # get the main paper
+    if l == link:
+      text = html.getListSection()
+      textsToExtract[link] = text
+    elif l.endswith(".pdf"):
+      p = pdf.PDF(l,saveLinkFolder,doi)
+      f = p.openPDFFile()
+      pdf_path = saveLinkFolder + "/" + l.split("/")[-1]
+      doc = fitz.open(pdf_path)
+      text = "\n".join([page.get_text() for page in doc])
+      textsToExtract[l] = text
+    elif l.endswith(".doc") or l.endswith(".docx"):
+      d = wordDoc.wordDoc(l,saveLinkFolder)
+      text = d.extractTextByPage()
+      textsToExtract[l] = text
+    elif l.split(".")[-1].lower() in "xlsx":
+      wc = word2vec.word2Vec()
+      corpus = wc.tableTransformToCorpusText([],l)
+      text = ''
+      for c in corpus:
+        para = corpus[c]
+        for words in para:
+          text += " ".join(words)
+      textsToExtract[l] = text
+  # delete folder after finishing getting text
+  cmd = f'rm -r data/{id}'
+  result = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+  return textsToExtract
 # Step 3.2: Extract context
 def extract_context(text, keyword, window=500):
+    # firstly try accession number
     idx = text.find(keyword)
     if idx == -1:
         return "Sample ID not found."
     return text[max(0, idx-window): idx+window]
+def extract_relevant_paragraphs(text, accession, keep_if=None, isolate=None):
+    if keep_if is None:
+        keep_if = ["sample", "method", "mtdna", "sequence", "collected", "dataset", "supplementary", "table"]
+
+    outputs = ""
+    text = text.lower()
+
+    # If isolate is provided, prioritize paragraphs that mention it
+    # If isolate is provided, prioritize paragraphs that mention it
+    if accession and accession.lower() in text:
+        if extract_context(text, accession.lower(), window=700) != "Sample ID not found.":
+            outputs += extract_context(text, accession.lower(), window=700)       
+    if isolate and isolate.lower() in text:
+        if extract_context(text, isolate.lower(), window=700) != "Sample ID not found.":
+            outputs += extract_context(text, isolate.lower(), window=700)
+    for keyword in keep_if:
+        para = extract_context(text, keyword)
+        if para and para not in outputs:
+            outputs += para + "\n"
+    return outputs
 # Step 4: Classification for now (demo purposes)
 # 4.1: Using a HuggingFace model (question-answering)
-def infer_location_fromQAModel(context, question="Where is the mtDNA sample from?", qa = None):
+def infer_location_fromQAModel(context, question="Where is the mtDNA sample from?"):
     try:
         # qa = pipeline("question-answering", model="distilbert-base-uncased-distilled-squad")
         # result = qa({"context": context, "question": question})
@@ -184,7 +203,6 @@ except OSError:
     download("en_core_web_sm")
     nlp = spacy.load("en_core_web_sm")
 
-nlp = spacy.load("en_core_web_sm")
 # Define the haplogroup-to-region mapping (simple rule-based)
 import csv
 
@@ -248,100 +266,188 @@ def infer_location_fromNCBI(accession):
         handle.close()
         match = re.findall(r'/(geo_loc_name|country|location)\s*=\s*"([^"]+)"', text)
         if match:
-            return ",".join([value for key, value in match]), ",".join([key for key, value in match])  # This is the value like "Brunei"
-        else:
-            return "" , ""
+            return match.group(2), match.group(0)  # This is the value like "Brunei"
+        return None
 
     except Exception as e:
         print("❌ Entrez error:", e)
+        return "",""
+
+### ANCIENT/MODERN FLAG
+from Bio import Entrez
+import re
+
+def flag_ancient_modern(accession, textsToExtract, isolate=None):
+    """
+    Try to classify a sample as Ancient or Modern using:
+    1. NCBI accession (if available)
+    2. Supplementary text or context fallback
+    """
+    context = ""
+    label, explain = "", ""
+
+    try:
+        # Check if we can fetch metadata from NCBI using the accession
+        handle = Entrez.efetch(db="nuccore", id=accession, rettype="medline", retmode="text")
+        text = handle.read()
+        handle.close()
+
+        isolate_source = re.search(r'/(isolation_source)\s*=\s*"([^"]+)"', text)
+        if isolate_source:
+            context += isolate_source.group(0) + " "
+
+        specimen = re.search(r'/(specimen|specimen_voucher)\s*=\s*"([^"]+)"', text)
+        if specimen:
+            context += specimen.group(0) + " "
+
+        if context.strip():
+            label, explain = detect_ancient_flag(context)
+            if label!="Unknown":
+              return label, explain + " from NCBI\n(" + context + ")"
+
+        # If no useful NCBI metadata, check supplementary texts
+        if textsToExtract:
+            labels = {"modern": [0, ""], "ancient": [0, ""], "unknown": 0}
+
+            for source in textsToExtract:
+                text_block = textsToExtract[source]
+                context = extract_relevant_paragraphs(text_block, accession, isolate=isolate)  # Reduce to informative paragraph(s)
+                label, explain = detect_ancient_flag(context)
+
+                if label == "Ancient":
+                    labels["ancient"][0] += 1
+                    labels["ancient"][1] += f"{source}:\n{explain}\n\n"
+                elif label == "Modern":
+                    labels["modern"][0] += 1
+                    labels["modern"][1] += f"{source}:\n{explain}\n\n"
+                else:
+                    labels["unknown"] += 1
+
+            if max(labels["modern"][0],labels["ancient"][0]) > 0:
+                if labels["modern"][0] > labels["ancient"][0]:
+                    return "Modern", labels["modern"][1]
+                else:
+                    return "Ancient", labels["ancient"][1]
+            else:
+              return "Unknown", "No strong keywords detected"
+        else:
+            print("No DOI or PubMed ID available for inference.")
+            return "", ""
+
+    except Exception as e:
+        print("Error:", e)
         return "", ""
 
 
+def detect_ancient_flag(context_snippet):
+    context = context_snippet.lower()
+
+    ancient_keywords = [
+        "ancient", "archaeological", "prehistoric", "neolithic", "mesolithic", "paleolithic",
+        "bronze age", "iron age", "burial", "tomb", "skeleton", "14c", "radiocarbon", "carbon dating",
+        "postmortem damage", "udg treatment", "adna", "degradation", "site", "excavation",
+        "archaeological context", "temporal transect", "population replacement", "cal bp", "calbp", "carbon dated"
+    ]
+
+    modern_keywords = [
+        "modern", "hospital", "clinical", "consent","blood","buccal","unrelated", "blood sample","buccal sample","informed consent", "donor", "healthy", "patient",
+        "genotyping", "screening", "medical", "cohort", "sequencing facility", "ethics approval",
+        "we analysed", "we analyzed", "dataset includes", "new sequences", "published data",
+        "control cohort", "sink population", "genbank accession", "sequenced", "pipeline", 
+        "bioinformatic analysis", "samples from", "population genetics", "genome-wide data"
+    ]
+
+    ancient_hits = [k for k in ancient_keywords if k in context]
+    modern_hits = [k for k in modern_keywords if k in context]
+
+    if ancient_hits and not modern_hits:
+        return "Ancient", f"Flagged as ancient due to keywords: {', '.join(ancient_hits)}"
+    elif modern_hits and not ancient_hits:
+        return "Modern", f"Flagged as modern due to keywords: {', '.join(modern_hits)}"
+    elif ancient_hits and modern_hits:
+        if len(ancient_hits) >= len(modern_hits):
+            return "Ancient", f"Mixed context, leaning ancient due to: {', '.join(ancient_hits)}"
+        else:
+            return "Modern", f"Mixed context, leaning modern due to: {', '.join(modern_hits)}"
+    
+    # Fallback to QA
+    answer = infer_fromQAModel(context, question="Are the mtDNA samples ancient or modern? Explain why.")
+    if answer.startswith("Error"):
+        return "Unknown", answer
+    if "ancient" in answer.lower():
+        return "Ancient", f"Leaning ancient based on QA: {answer}"
+    elif "modern" in answer.lower():
+        return "Modern", f"Leaning modern based on QA: {answer}"
+    else:
+        return "Unknown", f"No strong keywords or QA clues. QA said: {answer}"
+
 # STEP 5: Main pipeline: accession -> 1. get pubmed id and isolate -> 2. get doi -> 3. get text -> 4. prediction -> 5. output: inferred location + explanation + confidence score
 def classify_sample_location(accession):
-    outputs = {}
-    keyword, context, location, qa_result, haplo_result = "", "", "", "", ""
-    
-    ### First method (4.0): infer_location_fromNCBI(): Check direct info
-    """
-    Info directly searched in metadata by tags of /(geo_loc_name|country|location)
-    """
-    outputs[accession] = {}
-    location, search_key = infer_location_fromNCBI(accession)
-    NCBI_result = {
-        "source": "NCBI",
-        "sample_id": accession,
+  outputs = {}
+  keyword, context, location, qa_result, haplo_result = "", "", "", "", ""
+  # Step 1: get pubmed id and isolate
+  pubmedID, isolate = get_info_from_accession(accession)
+  if not pubmedID:
+    return {"error": f"Could not retrieve PubMed ID for accession {accession}"}
+  if not isolate:
+    isolate = "UNKNOWN_ISOLATE"
+  # Step 2: get doi
+  doi = get_doi_from_pubmed_id(pubmedID)
+  if not doi:
+    return {"error": "DOI not found for this accession. Cannot fetch paper or context."}
+
+  # Step 3: get text
+  '''textsToExtract = { "doiLink":"paperText"
+                        "file1.pdf":"text1",
+                        "file2.doc":"text2",
+                        "file3.xlsx":excelText3'''
+  textsToExtract = get_paper_text(doi,pubmedID)
+  if not textsToExtract:
+    return {"error": f"No texts extracted for DOI {doi}"}
+
+  # Step 4: prediction
+  outputs[accession] = {}
+  outputs[isolate] = {}
+  # 4.0 Infer from NCBI
+  location, outputNCBI = infer_location_fromNCBI(accession)
+  NCBI_result = {
+      "source": "NCBI",
+      "sample_id": accession,
+      "predicted_location": location,
+      "context_snippet": outputNCBI}
+  outputs[accession]["NCBI"]= {"NCBI": NCBI_result}
+  for key in textsToExtract:
+    text = textsToExtract[key]
+    # try accession number first
+    outputs[accession][key] = {}
+    keyword = accession
+    context = extract_context(text, keyword, window=500)
+    # 4.1: Using a HuggingFace model (question-answering)
+    location = infer_location_fromQAModel(context, question=f"Where is the mtDNA sample {keyword} from?")
+    qa_result = {
+        "source": key,
+        "sample_id": keyword,
         "predicted_location": location,
-        "context_snippet": search_key}
-    outputs[accession]["NCBI"]= {"NCBI": NCBI_result}
-    
-    ### Other methods
-    """
-    Without direct info of the origin, more advanced methods needs retrieval of articles and from isolates info
-    """
-    # Step 1: get pubmed id and isolate
-    pubmed_ids, isolates = get_info_from_accession(accession)
-    if pubmed_ids: 
-    # Step 2: get doi
-        dois = get_doi_from_pubmed_id(pubmed_ids)
-        if dois:
-    # Step 3: get text
-            '''textsToExtract = { "doiLink":"paperText"
-                                  "file1.pdf":"text1",
-                                  "file2.doc":"text2",
-                                  "file3.xlsx":excelText3'''
-            textsToExtract = get_paper_text(dois)
-            if textsToExtract:
-    # Step 4: prediction
-                # Prepare: load QA model once and for all
-                qa = pipeline("question-answering", model="distilbert-base-uncased-distilled-squad")
-                
-                for key in textsToExtract:
-                    text = textsToExtract[key]
-        # try accession number first
-                    outputs[accession][key] = {}
-                    keyword = accession
-                    context = extract_context(text, keyword, window=500)
-              # Method 4.1: Using a HuggingFace model (question-answering)
-                    location = infer_location_fromQAModel(context, question=f"Where is the mtDNA sample {keyword} from?")
-                    qa_result = {
-                        "source": key,
-                        "sample_id": keyword,
-                        "predicted_location": location,
-                        "context_snippet": context
-                    }
-                    outputs[keyword][key]["QAModel"] = qa_result
-                      
-                      
-              # Method 4.2: Infer from haplogroup
-                    haplo_result = classify_mtDNA_sample_from_haplo(context)
-                    outputs[keyword][key]["haplogroup"] = haplo_result
-                  
+        "context_snippet": context
+    }
+    outputs[keyword][key]["QAModel"] = qa_result
+    # 4.2: Infer from haplogroup
+    haplo_result = classify_mtDNA_sample_from_haplo(context)
+    outputs[keyword][key]["haplogroup"] = haplo_result
     # try isolate
-                    if isolates: 
-                        for isolate in isolates: 
-                            outputs[isolate] = {}
-                            keyword = isolate
-                            outputs[isolate][key] = {}
-                            context = extract_context(text, keyword, window=500)
-                  # Method 4.1 again for isolate: Using a HuggingFace model (question-answering)
-                            location = infer_location_fromQAModel(context, question=f"Where is the mtDNA sample {keyword} from?", qa=qa)
-                            qa_result = {
-                              "source": key,
-                              "sample_id": keyword,
-                              "predicted_location": location,
-                              "context_snippet": context
-                            }
-                            outputs[keyword][key]["QAModel"] = qa_result
-                  # Method 4.2 again for isolate: Infer from haplogroup
-                            haplo_result = classify_mtDNA_sample_from_haplo(context)
-                            outputs[keyword][key]["haplogroup"] = haplo_result
-                    else: 
-                      print("UNKNOWN_ISOLATE")
-            else:
-                print(f"error: No texts extracted for DOI {dois}")
-        else:
-            print("error: DOI not found for this accession. Cannot fetch paper or context.")
-    else:
-        print(f"error: Could not retrieve PubMed ID for accession {accession}")
-    return outputs
+    keyword = isolate
+    outputs[isolate][key] = {}
+    context = extract_context(text, keyword, window=500)
+    # 4.1.1: Using a HuggingFace model (question-answering)
+    location = infer_location_fromQAModel(context, question=f"Where is the mtDNA sample {keyword} from?")
+    qa_result = {
+        "source": key,
+        "sample_id": keyword,
+        "predicted_location": location,
+        "context_snippet": context
+    }
+    outputs[keyword][key]["QAModel"] = qa_result
+    # 4.2.1: Infer from haplogroup
+    haplo_result = classify_mtDNA_sample_from_haplo(context)
+    outputs[keyword][key]["haplogroup"] = haplo_result
+  return outputs
