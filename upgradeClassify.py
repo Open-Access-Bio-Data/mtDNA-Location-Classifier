@@ -246,7 +246,6 @@ def infer_location_for_sample(sample_id, context_text):
     if top_indices==[] or sentences == "No context found for sample":
       return "No clear location found in top matches"
     clusters, sentence_to_cluster, centroids = clusterPara(sentences)
-    print(len(sentences))
     topRankSen_DBSCAN = []
     mostTopSen = ""
     locations = ""
